@@ -93,6 +93,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun getLocationWeatherDetails() {
+        if (Constants.isNetworkAvailable(this)) {
+            Toast.makeText(this@MainActivity, "You have connected to the internet", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this@MainActivity, "You have no internet connection", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     /**
      * A function used to show the alert dialog when the permissions are denied and need to allow it from settings app info.
      */
@@ -142,6 +150,7 @@ class MainActivity : AppCompatActivity() {
             Log.i("Current Latitude", "$latitude")
             val longitude = mLastLocation.longitude
             Log.i("Current Longitude", "$longitude")
+            getLocationWeatherDetails()
         }
     }
 }
