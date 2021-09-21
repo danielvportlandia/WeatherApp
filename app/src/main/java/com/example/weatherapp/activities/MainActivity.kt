@@ -189,9 +189,9 @@ class MainActivity : AppCompatActivity() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult.lastLocation
             val latitude = mLastLocation.latitude
-            Log.i("WEATHER Current Latitude", "$latitude")
+            Log.i("WEATHER Latitude", "$latitude")
             val longitude = mLastLocation.longitude
-            Log.i("WEATHER Current Longitude", "$longitude")
+            Log.i("WEATHER Longitude", "$longitude")
             getLocationWeatherDetails(latitude, longitude)
         }
     }
