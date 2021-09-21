@@ -13,6 +13,8 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -228,6 +230,22 @@ class MainActivity : AppCompatActivity() {
         //Start the dialog and display it on screen.
         mProgressDialog!!.show()
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.action_refresh -> {
+                requestLocationData()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
     /**
      * This function is used to dismiss the progress dialog if it is visible to user.
