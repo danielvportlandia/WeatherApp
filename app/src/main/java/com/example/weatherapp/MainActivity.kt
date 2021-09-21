@@ -2,6 +2,7 @@ package com.example.weatherapp
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
 
     // A fused location client variable which is further used to get the user's current location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
+    private var mProgressDialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,13 +107,18 @@ class MainActivity : AppCompatActivity() {
             val listCall : Call<WeatherResponse> = service.getWeather(
                 latitude, longitude, Constants.METRIC_UNIT, Constants.APP_ID
             )
+
+            showCustomProgressDialog()
+
             listCall.enqueue(object : Callback<WeatherResponse> {
                 override fun onResponse(response: Response<WeatherResponse>, retrofit: Retrofit) {
                     if (response.isSuccess) {
                         val weatherList: WeatherResponse = response.body()
+                        hideProgressDialog()
                         Log.i("WEATHER", "$weatherList")
                     } else {
                         val rc = response.code()
+                        hideProgressDialog()
                         Log.e("WEATHER Error rc", "$rc")
                         when(rc) {
                             400 -> Log.e("WEATHER Error 400", "Bad Connection")
@@ -123,6 +130,7 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onFailure(t: Throwable?) {
                     Log.e("WEATHER Error", t!!.message.toString())
+                    hideProgressDialog()
                 }
 
             })
@@ -181,6 +189,27 @@ class MainActivity : AppCompatActivity() {
             val longitude = mLastLocation.longitude
             Log.i("WEATHER Current Longitude", "$longitude")
             getLocationWeatherDetails(latitude, longitude)
+        }
+    }
+
+    /**
+     * Method is used to show the Custom Progress Dialog.
+     */
+    private fun showCustomProgressDialog() {
+        mProgressDialog = Dialog(this)
+        /*Set the screen content from a layout resource.
+        The resource will be inflated, adding all top-level views to the screen.*/
+        mProgressDialog!!.setContentView(R.layout.dialog_custom_progress)
+        //Start the dialog and display it on screen.
+        mProgressDialog!!.show()
+    }
+
+    /**
+     * This function is used to dismiss the progress dialog if it is visible to user.
+     */
+    private fun hideProgressDialog() {
+        if (mProgressDialog != null) {
+            mProgressDialog!!.dismiss()
         }
     }
 }
