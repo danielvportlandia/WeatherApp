@@ -6,6 +6,7 @@ import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
@@ -23,6 +24,7 @@ import com.example.weatherapp.R
 import com.example.weatherapp.models.*
 import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
+import com.google.gson.Gson
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -43,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     // A fused location client variable which is further used to get the user's current location
     private lateinit var mFusedLocationClient: FusedLocationProviderClient
     private var mProgressDialog: Dialog? = null
+    private var mSharedPreferences : SharedPreferences? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +53,10 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize the Fused location variable
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        mSharedPreferences = getSharedPreferences(Constants.PREFERENCE_NAME, Context.MODE_PRIVATE)
+
+        setupUI()
 
         if (!isLocationEnabled()) {
             Toast.makeText(
@@ -122,7 +129,11 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccess) {
                         val weatherList: WeatherResponse = response.body()
                         hideProgressDialog()
-                        setupUI(weatherList)
+                        val weatherResponseJsonString = Gson().toJson(weatherList)
+                        val editor = mSharedPreferences!!.edit()
+                        editor.putString(Constants.WEATHER_RESPONSE_DATA, weatherResponseJsonString)
+                        editor.apply()
+                        setupUI()
                         Log.i("WEATHER", "$weatherList")
                     } else {
                         val rc = response.code()
@@ -147,7 +158,11 @@ class MainActivity : AppCompatActivity() {
                                     name = "Mountain View",
                                     cod = 200
                                 )
-                                setupUI(mockWeatherResponse)
+                                val weatherResponseJsonString = Gson().toJson(mockWeatherResponse)
+                                val editor = mSharedPreferences!!.edit()
+                                editor.putString(Constants.WEATHER_RESPONSE_DATA, weatherResponseJsonString)
+                                editor.apply()
+                                setupUI()
                             }
                             404 -> Log.e("WEATHER Error 404", "Not found")
                             else -> Log.e("WEATHER Error", "Generic error")
@@ -256,8 +271,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupUI(weatherList: WeatherResponse) {
-        for (i in weatherList.weather.indices) {
+    private fun setupUI() {
+
+        val weatherResponseJsonString = mSharedPreferences!!.getString(Constants.WEATHER_RESPONSE_DATA, "")
+
+        if (!weatherResponseJsonString.isNullOrEmpty()) {
+            val weatherList = Gson().fromJson(weatherResponseJsonString, WeatherResponse::class.java)
+            for (i in weatherList.weather.indices) {
             Log.i("WEATHER Name", weatherList.weather.toString())
             tv_main.text = weatherList.weather[i].main
             tv_main_description.text = weatherList.weather[i].description
@@ -289,6 +309,7 @@ class MainActivity : AppCompatActivity() {
                 "11n" -> iv_main.setImageResource(R.drawable.rain)
                 "13n" -> iv_main.setImageResource(R.drawable.snowflake)
             }
+        }
         }
     }
 
