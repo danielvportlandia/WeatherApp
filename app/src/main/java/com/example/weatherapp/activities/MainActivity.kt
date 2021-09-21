@@ -118,14 +118,33 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccess) {
                         val weatherList: WeatherResponse = response.body()
                         hideProgressDialog()
-                        setupUI((weatherList))
+                        setupUI(weatherList)
                         Log.i("WEATHER", "$weatherList")
                     } else {
                         val rc = response.code()
                         hideProgressDialog()
                         Log.e("WEATHER Error rc", "$rc")
                         when(rc) {
-                            400 -> Log.e("WEATHER Error 400", "Bad Connection")
+                            400 -> {
+                                Log.e("WEATHER Error 400", "Bad Connection")
+                                val mockWeather = Weather(id = 711, main = "Smoke", description = "smoke", icon = "50n")
+                                val mockWeatherResponse  = WeatherResponse(
+                                    coord = Coord(-122.084, 37.422),
+                                    weather = listOf(mockWeather),
+                                    base = "stations",
+                                    main = Main(296.46, 1014, 42, 295.94, 294.14, 299.89),
+                                    visibility = 10000,
+                                    wind = Wind(4.63, 330),
+                                    clouds = Clouds(1),
+                                    dt = 1632193426,
+                                    sys = Sys(1, 5310, "US", 1632146087, 1632190114),
+                                    timezone = -25200,
+                                    id = 5375480,
+                                    name = "Mountain View",
+                                    cod = 200
+                                )
+                                setupUI(mockWeatherResponse)
+                            }
                             404 -> Log.e("WEATHER Error 404", "Not found")
                             else -> Log.e("WEATHER Error", "Generic error")
                         }
