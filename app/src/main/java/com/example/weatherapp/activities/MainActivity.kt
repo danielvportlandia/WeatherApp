@@ -18,7 +18,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.weatherapp.Constants
 import com.example.weatherapp.R
-import com.example.weatherapp.models.WeatherResponse
+import com.example.weatherapp.models.*
 import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
@@ -28,6 +28,8 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import kotlinx.android.synthetic.main.activity_main.*
 import retrofit.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 // OpenWeather Link : https://openweathermap.org/api
 /**
@@ -243,14 +245,30 @@ class MainActivity : AppCompatActivity() {
             tv_main_description.text = weatherList.weather[i].description
             tv_temp.text = weatherList.main.temp.toString() + getUnit(application.resources.configuration.locales.toString())
 
+            tv_humidity.text = weatherList.main.humidity.toString() + "per cent"
+            tv_min.text = weatherList.main.temp_min.toString() + " min"
+            tv_max.text = weatherList.main.temp_max.toString() + " max"
+            tv_speed.text = weatherList.wind.speed.toString()
+            tv_name.text = weatherList.name
+            tv_country.text = weatherList.sys.country
+
+            tv_sunrise_time.text = unixTime(weatherList.sys.sunrise)
+            tv_sunset_time.text = unixTime(weatherList.sys.sunset)
         }
     }
 
-    private fun getUnit(value: String) : String? {
+    private fun getUnit(value: String) : String {
         var type = "°C"
         if ("US" == value || "LR" == value || "MM" == value) {
             type = "°F"
         }
         return type
+    }
+
+    private fun unixTime(timex: Long) : String? {
+        val date = Date(timex *1000L)
+        val sdf = SimpleDateFormat("HH:mm", Locale.US)
+        sdf.timeZone = TimeZone.getDefault()
+        return sdf.format(date)
     }
 }
