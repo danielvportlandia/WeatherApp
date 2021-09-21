@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
                         when(rc) {
                             400 -> {
                                 Log.e("WEATHER Error 400", "Bad Connection")
-                                val mockWeather = Weather(id = 711, main = "Smoke", description = "smoke", icon = "50n")
+                                val mockWeather = Weather(id = 711, main = "Smoke", description = "smoke", icon = "11d")
                                 val mockWeatherResponse  = WeatherResponse(
                                     coord = Coord(-122.084, 37.422),
                                     weather = listOf(mockWeather),
