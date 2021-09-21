@@ -15,12 +15,15 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.weatherapp.models.WeatherResponse
+import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import retrofit.*
 
 // OpenWeather Link : https://openweathermap.org/api
 /**
@@ -93,9 +96,36 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun getLocationWeatherDetails() {
-        if (Constants.isNetworkAvailable(this)) {
-            Toast.makeText(this@MainActivity, "You have connected to the internet", Toast.LENGTH_SHORT).show()
+    private fun getLocationWeatherDetails(latitude: Double, longitude: Double) {
+        if (Constants.isNetworkAvailable(this@MainActivity)) {
+            val retrofit : Retrofit = Retrofit.Builder()
+                .baseUrl(Constants.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create()).build()
+            val service : WeatherService = retrofit.create<WeatherService>(WeatherService::class.java)
+            val listCall : Call<WeatherResponse> = service.getWeather(
+                latitude, longitude, Constants.METRIC_UNIT, Constants.APP_ID
+            )
+            listCall.enqueue(object : Callback<WeatherResponse> {
+                override fun onResponse(response: Response<WeatherResponse>, retrofit: Retrofit) {
+                    if (response.isSuccess) {
+                        val weatherList: WeatherResponse = response.body()
+                        Log.i("WEATHER", "$weatherList")
+                    } else {
+                        val rc = response.code()
+                        Log.e("WEATHER Error rc", "$rc")
+                        when(rc) {
+                            400 -> Log.e("WEATHER Error 400", "Bad Connection")
+                            404 -> Log.e("WEATHER Error 404", "Not found")
+                            else -> Log.e("WEATHER Error", "Generic error")
+                        }
+                    }
+                }
+
+                override fun onFailure(t: Throwable?) {
+                    Log.e("WEATHER Error", t!!.message.toString())
+                }
+
+            })
         } else {
             Toast.makeText(this@MainActivity, "You have no internet connection", Toast.LENGTH_SHORT).show()
         }
@@ -147,10 +177,10 @@ class MainActivity : AppCompatActivity() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult.lastLocation
             val latitude = mLastLocation.latitude
-            Log.i("Current Latitude", "$latitude")
+            Log.i("WEATHER Current Latitude", "$latitude")
             val longitude = mLastLocation.longitude
-            Log.i("Current Longitude", "$longitude")
-            getLocationWeatherDetails()
+            Log.i("WEATHER Current Longitude", "$longitude")
+            getLocationWeatherDetails(latitude, longitude)
         }
     }
 }
