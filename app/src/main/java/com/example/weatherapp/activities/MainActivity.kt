@@ -1,4 +1,4 @@
-package com.example.weatherapp
+package com.example.weatherapp.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -16,6 +16,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.example.weatherapp.Constants
+import com.example.weatherapp.R
 import com.example.weatherapp.models.WeatherResponse
 import com.example.weatherapp.network.WeatherService
 import com.google.android.gms.location.*
@@ -24,6 +26,7 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit.*
 
 // OpenWeather Link : https://openweathermap.org/api
@@ -115,6 +118,7 @@ class MainActivity : AppCompatActivity() {
                     if (response.isSuccess) {
                         val weatherList: WeatherResponse = response.body()
                         hideProgressDialog()
+                        setupUI((weatherList))
                         Log.i("WEATHER", "$weatherList")
                     } else {
                         val rc = response.code()
@@ -211,5 +215,23 @@ class MainActivity : AppCompatActivity() {
         if (mProgressDialog != null) {
             mProgressDialog!!.dismiss()
         }
+    }
+
+    private fun setupUI(weatherList: WeatherResponse) {
+        for (i in weatherList.weather.indices) {
+            Log.i("WEATHER Name", weatherList.weather.toString())
+            tv_main.text = weatherList.weather[i].main
+            tv_main_description.text = weatherList.weather[i].description
+            tv_temp.text = weatherList.main.temp.toString() + getUnit(application.resources.configuration.locales.toString())
+
+        }
+    }
+
+    private fun getUnit(value: String) : String? {
+        var type = "°C"
+        if ("US" == value || "LR" == value || "MM" == value) {
+            type = "°F"
+        }
+        return type
     }
 }
